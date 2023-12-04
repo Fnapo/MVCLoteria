@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34322.80
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MVCLoteria", "MVCLoteria\MVCLoteria.csproj", "{6D563414-CC1D-443F-8465-4AA8E3BADAAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatosLoteria", "DatosLoteria\DatosLoteria.csproj", "{EFDECB26-A1F4-4789-B950-B8913C40C391}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D563414-CC1D-443F-8465-4AA8E3BADAAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D563414-CC1D-443F-8465-4AA8E3BADAAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D563414-CC1D-443F-8465-4AA8E3BADAAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D563414-CC1D-443F-8465-4AA8E3BADAAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFDECB26-A1F4-4789-B950-B8913C40C391}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFDECB26-A1F4-4789-B950-B8913C40C391}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFDECB26-A1F4-4789-B950-B8913C40C391}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFDECB26-A1F4-4789-B950-B8913C40C391}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F1FF7314-7626-4307-826F-AD778D7C14CF}
+	EndGlobalSection
+EndGlobal
