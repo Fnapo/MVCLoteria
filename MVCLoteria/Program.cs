@@ -1,3 +1,7 @@
+using DatosLoteria.Data;
+using DatosLoteria.Static;
+using Microsoft.EntityFrameworkCore;
+
 namespace MVCLoteria
 {
 	public class Program
@@ -8,8 +12,10 @@ namespace MVCLoteria
 
 			// Add services to the container.
 			builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<LoteriaContext>(options =>
+				options.UseSqlServer(StaticLoteria.CadenaConexion()));
 
-			var app = builder.Build();
+            var app = builder.Build();
 
 			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())

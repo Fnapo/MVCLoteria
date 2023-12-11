@@ -16,7 +16,7 @@ namespace MVCLoteria.Controllers
 
 		public IActionResult Index()
 		{
-			_logger.LogInformation($"Estoy en la página Index ...");
+			_logger.LogInformation("Estoy en la página Index ...");
 
 			return View();
 		}
