@@ -61,7 +61,7 @@ namespace DatosLoteria {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Server=PACO2015\SQLEXPRESS;Database=Loteria;Trusted_Connection=True;TrustServerCertificate=true;.
+        ///   Busca una cadena traducida similar a Server=PACO2015\EXPRESS22;Database=Loteria;Trusted_Connection=True;TrustServerCertificate=true;.
         /// </summary>
         internal static string CadenaConexion {
             get {

@@ -4,7 +4,7 @@ using DatosLoteria.Modelos;
 using DatosLoteria.Static;
 using Microsoft.EntityFrameworkCore;
 
-namespace DatosLoteria.Data;
+namespace DatosLoteria.Contexto;
 
 public partial class LoteriaContext : DbContext
 {
@@ -17,15 +17,17 @@ public partial class LoteriaContext : DbContext
     {
     }
 
+    public virtual DbSet<Deuda> Deudas { get; set; }
+
     public virtual DbSet<Pago> Pagos { get; set; }
 
-    public virtual DbSet<Series> Series { get; set; }
+    public virtual DbSet<Serie> Series { get; set; }
 
     public virtual DbSet<Socio> Socios { get; set; }
 
     public virtual DbSet<Sorteo> Sorteos { get; set; }
 
-    public virtual DbSet<VistaDeuda> VistaDeudas { get; set; }
+    public virtual DbSet<VistaCompra> VistaCompras { get; set; }
 
     public virtual DbSet<VistaPago> VistaPagos { get; set; }
 
@@ -34,64 +36,52 @@ public partial class LoteriaContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Deuda>(entity =>
+        {
+            entity.ToView("Deudas");
+        });
+
         modelBuilder.Entity<Pago>(entity =>
         {
-            entity.HasOne(d => d.FkSocioNavigation).WithMany(p => p.Pagos)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Pagos_Socios");
+            entity.HasOne(d => d.FkSocioNavigation).WithMany(p => p.Pagos).HasConstraintName("FK_Pago_Socio");
 
             entity.HasOne(d => d.FkSorteoNavigation).WithMany(p => p.Pagos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Pagos_Sorteos");
+                .HasConstraintName("FK_Pago_Sorteo");
         });
 
-        modelBuilder.Entity<Series>(entity =>
+        modelBuilder.Entity<Serie>(entity =>
         {
-            entity.HasKey(e => new { e.FkSorteo, e.Inicio }).HasName("PK_Series_1");
-
-            entity.HasOne(d => d.FkSocioNavigation).WithMany(p => p.Series)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Series_Socios");
+            entity.HasOne(d => d.FkSocioNavigation).WithMany(p => p.Series).HasConstraintName("FK_Serie_Socio");
 
             entity.HasOne(d => d.FkSorteoNavigation).WithMany(p => p.Series)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Series_Sorteos");
+                .HasConstraintName("FK_Serie_Sorteo");
         });
 
         modelBuilder.Entity<Socio>(entity =>
         {
-            entity.HasKey(e => e.IdSocio).HasName("PK_Socios_1");
-
             entity.Property(e => e.Apellidos).IsFixedLength();
-            entity.Property(e => e.CodigoPostal)
-                .HasDefaultValue("46600")
-                .IsFixedLength();
-            entity.Property(e => e.Dni).IsFixedLength();
             entity.Property(e => e.Domicilio).IsFixedLength();
             entity.Property(e => e.Letra).IsFixedLength();
             entity.Property(e => e.Nombre).IsFixedLength();
             entity.Property(e => e.NombreCompleto).HasComputedColumnSql("((Trim([Apellidos])+', ')+Trim([Nombre]))", false);
-            entity.Property(e => e.Poblacion)
-                .HasDefaultValue("Alzira")
-                .IsFixedLength();
+            entity.Property(e => e.Poblacion).IsFixedLength();
         });
 
         modelBuilder.Entity<Sorteo>(entity =>
         {
-            entity.HasKey(e => e.IdSorteo).HasName("PK_Sorteos_1");
-
-            entity.Property(e => e.Numero).IsFixedLength();
-            entity.Property(e => e.Precio).HasDefaultValue(500m);
+            entity.Property(e => e.Precio).HasDefaultValue(5m);
         });
 
-        modelBuilder.Entity<VistaDeuda>(entity =>
+        modelBuilder.Entity<VistaCompra>(entity =>
         {
-            entity.ToView("VistaDeudas");
+            entity.ToView("Vista_Compras");
         });
 
         modelBuilder.Entity<VistaPago>(entity =>
         {
-            entity.ToView("VistaPagos");
+            entity.ToView("Vista_Pagos");
         });
 
         OnModelCreatingPartial(modelBuilder);

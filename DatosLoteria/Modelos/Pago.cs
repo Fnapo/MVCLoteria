@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DatosLoteria.Modelos;
 
 [PrimaryKey("FkSorteo", "FkSocio")]
+[Table("Pago")]
 public partial class Pago
 {
     [Key]
@@ -18,7 +19,7 @@ public partial class Pago
     public int FkSocio { get; set; }
 
     [Column(TypeName = "money")]
-    public decimal? Pagado { get; set; }
+    public decimal Cantidad { get; set; }
 
     [ForeignKey("FkSocio")]
     [InverseProperty("Pagos")]

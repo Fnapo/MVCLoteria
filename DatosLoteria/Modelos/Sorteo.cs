@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatosLoteria.Modelos;
 
+[Table("Sorteo")]
 public partial class Sorteo
 {
     [Key]
@@ -14,15 +15,14 @@ public partial class Sorteo
 
     public DateOnly Fecha { get; set; }
 
-    [StringLength(5)]
-    public string Numero { get; set; } = null!;
-
     [Column(TypeName = "money")]
     public decimal Precio { get; set; }
+
+    public int Numero { get; set; }
 
     [InverseProperty("FkSorteoNavigation")]
     public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 
     [InverseProperty("FkSorteoNavigation")]
-    public virtual ICollection<Series> Series { get; set; } = new List<Series>();
+    public virtual ICollection<Serie> Series { get; set; } = new List<Serie>();
 }

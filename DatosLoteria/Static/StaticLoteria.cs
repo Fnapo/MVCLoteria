@@ -1,5 +1,4 @@
-﻿using DatosLoteria.Data;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +11,7 @@ namespace DatosLoteria.Static
     static public class StaticLoteria
     {
         //public static LoteriaContext Contexto { get; } = new LoteriaContext();
+        public static string Error { get; } = "¡Error!";
 
         /*
         public static string CadenaConexion()
@@ -25,8 +25,7 @@ namespace DatosLoteria.Static
         */
         public static string CadenaConexion()
         {
-            ResourceManager recursos = new ResourceManager(typeof(Datos));
-            string salida = recursos.GetString("CadenaConexion") ?? "Error.";
+            string salida = Datos.CadenaConexion;
 
             return salida;
         }

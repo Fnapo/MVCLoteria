@@ -1,4 +1,3 @@
-using DatosLoteria.Data;
 using Microsoft.AspNetCore.Mvc;
 using MVCLoteria.Models;
 using System.Diagnostics;

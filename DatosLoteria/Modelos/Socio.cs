@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatosLoteria.Modelos;
 
+[Table("Socio")]
 public partial class Socio
 {
     [Key]
@@ -24,22 +25,21 @@ public partial class Socio
     [StringLength(25)]
     public string Poblacion { get; set; } = null!;
 
-    [StringLength(5)]
-    public string CodigoPostal { get; set; } = null!;
+    public int CodigoPostal { get; set; }
 
     [StringLength(77)]
     public string? NombreCompleto { get; set; }
 
     [Column("DNI")]
-    [StringLength(8)]
-    public string? Dni { get; set; }
+    public int? Dni { get; set; }
 
     [StringLength(1)]
+    [Unicode(false)]
     public string? Letra { get; set; }
 
     [InverseProperty("FkSocioNavigation")]
     public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 
     [InverseProperty("FkSocioNavigation")]
-    public virtual ICollection<Series> Series { get; set; } = new List<Series>();
+    public virtual ICollection<Serie> Series { get; set; } = new List<Serie>();
 }

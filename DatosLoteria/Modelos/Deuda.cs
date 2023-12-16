@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DatosLoteria.Modelos;
 
 [Keyless]
-public partial class VistaPago
+public partial class Deuda
 {
     [Column("ID_Socio")]
     public int IdSocio { get; set; }
@@ -22,4 +22,12 @@ public partial class VistaPago
 
     [Column(TypeName = "money")]
     public decimal Cantidad { get; set; }
+
+    public int? Papeletas { get; set; }
+
+    [Column(TypeName = "money")]
+    public decimal? Compra { get; set; }
+
+    [Column("Deuda", TypeName = "money")]
+    public decimal? Deuda1 { get; set; }
 }

@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DatosLoteria.Data;
+using DatosLoteria.Contexto;
 using DatosLoteria.Modelos;
-using DatosLoteria.Static;
 
 namespace MVCLoteria.Controllers
 {
@@ -23,37 +22,46 @@ namespace MVCLoteria.Controllers
         // GET: Series
         public async Task<IActionResult> Index()
         {
-            var loteriaContext = _context.Series;
+            var loteriaContext = _context.Series.Include(s => s.FkSocioNavigation).Include(s => s.FkSorteoNavigation);
 
             return View(await loteriaContext.ToListAsync());
         }
 
         // GET: Series/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: Series/Details/5 ... /5(sorteo)/1(inicio)
+        [Route("series/[action]/{sorteo}/{inicio}")]
+        public async Task<IActionResult> Details(int? sorteo, int? inicio)
         {
-            if (id == null)
+            if (sorteo == null || inicio == null)
             {
                 return NotFound();
             }
 
-            var series = await _context.Series
+            var serie = await _context.Series
                 .Include(s => s.FkSocioNavigation)
                 .Include(s => s.FkSorteoNavigation)
-                .FirstOrDefaultAsync(m => m.FkSorteo == id);
-            if (series == null)
+                .FirstOrDefaultAsync(m => m.FkSorteo == sorteo && m.Inicio == inicio);
+
+            if (serie == null)
             {
                 return NotFound();
             }
 
-            return View(series);
+            return View(serie);
         }
 
         // GET: Series/Create
         public IActionResult Create()
         {
-            SelectListas();
+            ListasSelect();
 
             return View();
+        }
+
+        private void ListasSelect()
+        {
+            ViewData["FkSocio"] = new SelectList(_context.Socios.OrderBy(s => s.NombreCompleto), "IdSocio", "NombreCompleto");
+            ViewData["FkSorteo"] = new SelectList(_context.Sorteos.OrderByDescending(s => s.Fecha), "IdSorteo", "Fecha");
         }
 
         // POST: Series/Create
@@ -61,19 +69,47 @@ namespace MVCLoteria.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FkSorteo,FkSocio,Inicio,Fin")] Series series)
+        public async Task<IActionResult> Create([Bind("FkSorteo,FkSocio,Inicio,Fin")] Serie serie)
         {
-            ValidacionesPropias(series);
+            ValidacionesPropias(serie);
             if (ModelState.IsValid)
             {
-                _context.Add(series);
+                _context.Add(serie);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
-            SelectListas();
+            ListasSelect();
 
-            return View(series);
+            return View(serie);
+        }
+
+        private void ValidacionesPropias(Serie serie)
+        {
+            if (ValidacionInicioFin(serie))
+            {
+                ValidacionNoVendida(serie);
+            }
+        }
+
+        private bool ValidacionNoVendida(Serie serie)
+        {
+            var serieMadre = _context.Series.Where(s => (s.FkSorteo == serie.FkSorteo) && ((s.Inicio >= serie.Inicio && s.Inicio <= serie.Fin) || (s.Fin >= serie.Inicio && s.Fin <= serie.Fin) || (serie.Inicio >= s.Inicio && serie.Inicio <= s.Fin))).FirstOrDefault();
+
+            if (serieMadre == default) { return true; }
+
+            ModelState.AddModelError("Fin", "Parte de la serie ya está vendida ...");
+
+            return false;
+        }
+
+        private bool ValidacionInicioFin(Serie serie)
+        {
+            if (serie.Inicio <= serie.Fin) { return true; }
+
+            ModelState.AddModelError("Fin", "Fin debe ser mayor o igual que Inicio ...");
+
+            return false;
         }
 
         // GET: Series/Edit/5
@@ -84,14 +120,14 @@ namespace MVCLoteria.Controllers
                 return NotFound();
             }
 
-            var series = await _context.Series.FindAsync(id);
-            if (series == null)
+            var serie = await _context.Series.FindAsync(id);
+            if (serie == null)
             {
                 return NotFound();
             }
-            ViewData["FkSocio"] = new SelectList(_context.Socios, "IdSocio", "Apellidos", series.FkSocio);
-            ViewData["FkSorteo"] = new SelectList(_context.Sorteos, "IdSorteo", "Numero", series.FkSorteo);
-            return View(series);
+            ViewData["FkSocio"] = new SelectList(_context.Socios, "IdSocio", "Apellidos", serie.FkSocio);
+            ViewData["FkSorteo"] = new SelectList(_context.Sorteos, "IdSorteo", "IdSorteo", serie.FkSorteo);
+            return View(serie);
         }
 
         // POST: Series/Edit/5
@@ -99,9 +135,9 @@ namespace MVCLoteria.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("FkSorteo,FkSocio,Inicio,Fin")] Series series)
+        public async Task<IActionResult> Edit(int id, [Bind("FkSorteo,FkSocio,Inicio,Fin")] Serie serie)
         {
-            if (id != series.FkSorteo)
+            if (id != serie.FkSorteo)
             {
                 return NotFound();
             }
@@ -110,12 +146,12 @@ namespace MVCLoteria.Controllers
             {
                 try
                 {
-                    _context.Update(series);
+                    _context.Update(serie);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SeriesExists(series.FkSorteo))
+                    if (!SerieExists(serie.FkSorteo))
                     {
                         return NotFound();
                     }
@@ -126,9 +162,9 @@ namespace MVCLoteria.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FkSocio"] = new SelectList(_context.Socios, "IdSocio", "Apellidos", series.FkSocio);
-            ViewData["FkSorteo"] = new SelectList(_context.Sorteos, "IdSorteo", "Numero", series.FkSorteo);
-            return View(series);
+            ViewData["FkSocio"] = new SelectList(_context.Socios, "IdSocio", "Apellidos", serie.FkSocio);
+            ViewData["FkSorteo"] = new SelectList(_context.Sorteos, "IdSorteo", "IdSorteo", serie.FkSorteo);
+            return View(serie);
         }
 
         // GET: Series/Delete/5
@@ -139,16 +175,16 @@ namespace MVCLoteria.Controllers
                 return NotFound();
             }
 
-            var series = await _context.Series
+            var serie = await _context.Series
                 .Include(s => s.FkSocioNavigation)
                 .Include(s => s.FkSorteoNavigation)
                 .FirstOrDefaultAsync(m => m.FkSorteo == id);
-            if (series == null)
+            if (serie == null)
             {
                 return NotFound();
             }
 
-            return View(series);
+            return View(serie);
         }
 
         // POST: Series/Delete/5
@@ -156,55 +192,19 @@ namespace MVCLoteria.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var series = await _context.Series.FindAsync(id);
-            if (series != null)
+            var serie = await _context.Series.FindAsync(id);
+            if (serie != null)
             {
-                _context.Series.Remove(series);
+                _context.Series.Remove(serie);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SeriesExists(int id)
+        private bool SerieExists(int id)
         {
             return _context.Series.Any(e => e.FkSorteo == id);
-        }
-
-        private void SelectListas()
-        {
-            ViewData["FkSocio"] = new SelectList(_context.Socios.OrderBy(s => s.NombreCompleto), "IdSocio", "NombreCompleto");
-            ViewData["FkSorteo"] = new SelectList(_context.Sorteos.OrderByDescending(s => s.Fecha), "IdSorteo", "Fecha");
-        }
-        private void ValidacionesPropias(Series series)
-        {
-            if(ValidarInicioFin(series))
-            {
-                ValidarSinVender(series);
-            }
-        }
-
-        private bool ValidarInicioFin(Series series)
-        {
-            if (series.Inicio <= series.Fin)  { return true; }
-
-            ModelState.AddModelError("Fin", "Fin debe ser mayor o igual que Inicio ...");
-
-            return false;
-        }
-
-        private bool ValidarSinVender(Series series)
-        {
-            var listaSeries = _context.Series.Where(s => (s.FkSorteo == series.FkSorteo) &&
-            ((s.Inicio >= series.Inicio && s.Inicio <= series.Fin) ||
-            (s.Fin >= series.Inicio && s.Fin <= series.Fin) ||
-            (series.Inicio >= s.Inicio && series.Inicio <= s.Fin))).FirstOrDefault();
-
-            if (listaSeries == default) { return true; }
-
-            ModelState.AddModelError("Fin", "Parte de la serie ya está vendida ...");
-
-            return false;
         }
     }
 }
